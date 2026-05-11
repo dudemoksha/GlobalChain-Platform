@@ -1,8 +1,8 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  // Use public tunnel for mobile app connectivity (Works anywhere!)
-  return 'https://rude-roses-argue.loca.lt';
+  // Permanent Cloud Backend on Render
+  return 'https://globalchain-platform.onrender.com';
 };
 
 const BASE = getBase();
@@ -116,7 +116,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  const ws = new WebSocket('wss://rude-roses-argue.loca.lt/ws');
+  const ws = new WebSocket('wss://globalchain-platform.onrender.com/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
   };
