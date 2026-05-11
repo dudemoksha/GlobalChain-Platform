@@ -1,8 +1,8 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  // Cloud URL for mobile stability
-  return 'https://globalchain-platform.onrender.com';
+  // Correct Local IP for current Wi-Fi
+  return 'http://10.44.251.141:8000';
 };
 
 const BASE = getBase();
