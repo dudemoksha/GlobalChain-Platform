@@ -132,7 +132,7 @@ def health():
     return {"status": "ok", "service": "GlobalChain API"}
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="http://.*", # Allow any http origin (local or network)
+    allow_origin_regex=".*", # Allow all origins including capacitor:// and https://
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

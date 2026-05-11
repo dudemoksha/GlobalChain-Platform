@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { api } from '../api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,28 +15,15 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const host = window.location.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
-      const response = await fetch(`http://${host}:8000/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Login failed');
-      }
-
-      const data = await response.json();
+      const data = await api.login(email, password);
       localStorage.setItem('token', data.access_token);
-      localStorage.setItem('role', data.role);
       
-      if (data.role === 'Admin') navigate('/admin');
-      else if (data.role === 'Supplier') navigate('/supplier');
+      // Fetch user to confirm role/details
+      const user = await api.me();
+      localStorage.setItem('role', user.role);
+      
+      if (user.role === 'Admin') navigate('/admin');
+      else if (user.role === 'Supplier') navigate('/supplier');
       else navigate('/dashboard');
 
     } catch (err) {

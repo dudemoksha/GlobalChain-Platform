@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { api } from '../api';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -20,13 +21,7 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email, password: form.password, role: form.role, company: form.company })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Signup failed');
+      const data = await api.signup({ email: form.email, password: form.password, role: form.role, company: form.company });
       setStatus('success');
       setMessage('Your request has been submitted. An administrator will review and approve your account shortly.');
     } catch (err) {
