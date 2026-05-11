@@ -237,7 +237,43 @@ async def websocket_endpoint(ws: WebSocket):
 # ─── Auth ────────────────────────────────────────────────────────────────────
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    user = None
+    
+    # Try direct DB first
+    try:
+        user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    except Exception as e:
+        print(f"DB query failed, trying Supabase REST API: {e}")
+    
+    # Fallback: Use Supabase REST API if DB connection fails
+    if user is None:
+        try:
+            import urllib.request as _ur, urllib.parse as _up, json as _json, os as _os
+            supabase_url = _os.getenv("SUPABASE_URL", "https://ltrpjhxwvmkbhhcwcnhy.supabase.co")
+            service_key = _os.getenv("SUPABASE_SERVICE_KEY", "")
+            api_url = f"{supabase_url}/rest/v1/users?email=eq.{_up.quote(form_data.username)}&select=*"
+            req = _ur.Request(api_url)
+            req.add_header("apikey", service_key)
+            req.add_header("Authorization", f"Bearer {service_key}")
+            with _ur.urlopen(req) as r:
+                users_data = _json.loads(r.read())
+                if users_data:
+                    u = users_data[0]
+                    # Create a simple user-like object
+                    class UserObj:
+                        pass
+                    user = UserObj()
+                    user.id = u.get("id")
+                    user.email = u.get("email")
+                    user.hashed_password = u.get("hashed_password")
+                    user.role = u.get("role")
+                    user.tier = u.get("tier", 0)
+                    user.company = u.get("company", "")
+                    user.status = u.get("status", "Approved")
+                    print(f"Got user via REST API: {user.email}")
+        except Exception as e2:
+            print(f"REST API fallback also failed: {e2}")
+    
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Incorrect credentials")
     if user.status != "Approved":
