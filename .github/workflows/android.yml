@@ -51,6 +51,9 @@ jobs:
       - name: Generate Direct Download Link
         run: |
           echo "Generating direct download link..."
-          curl --upload-file globalchain-frontend/android/app/build/outputs/apk/debug/app-debug.apk https://transfer.sh/GlobalChain.apk > direct_link.txt
-          echo "DIRECT DOWNLOAD LINK: $(cat direct_link.txt)"
-          echo "DIRECT_LINK=$(cat direct_link.txt)" >> $GITHUB_ENV
+          curl -T globalchain-frontend/android/app/build/outputs/apk/debug/app-debug.apk https://pixeldrain.com/api/file/ > direct_link.json
+          echo "DIRECT DOWNLOAD RESPONSE:"
+          cat direct_link.json
+          # Extract the ID and form the link
+          ID=$(jq -r '.id' direct_link.json)
+          echo "DIRECT DOWNLOAD LINK: https://pixeldrain.com/u/$ID"

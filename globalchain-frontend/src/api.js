@@ -1,8 +1,8 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  // Permanent Cloud Backend on Render
-  return 'https://globalchain-platform.onrender.com';
+  // Permanent Cloud Backend on Vercel
+  return 'https://globalchain-platform.vercel.app';
 };
 
 const BASE = getBase();
@@ -116,7 +116,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  const ws = new WebSocket('wss://globalchain-platform.onrender.com/ws');
+  const ws = new WebSocket('wss://globalchain-platform.vercel.app/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
   };
