@@ -1,10 +1,8 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  if (typeof window !== 'undefined' && window.location.hostname) {
-    return `http://${window.location.hostname}:8000`;
-  }
-  return 'http://127.0.0.1:8000';
+  // Hardcoded for local development with mobile APK
+  return 'http://10.64.216.141:8000';
 };
 
 const BASE = getBase();
@@ -118,7 +116,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+  const ws = new WebSocket('ws://10.64.216.141:8000/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
   };
