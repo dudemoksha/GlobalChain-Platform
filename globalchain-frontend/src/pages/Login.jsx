@@ -86,6 +86,23 @@ export default function Login() {
           </button>
         </form>
 
+        <div style={{ margin: '16px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+        </div>
+
+        <button 
+          onClick={async () => {
+            await api.guestLogin();
+            navigate('/dashboard');
+          }}
+          className="btn btn-secondary" 
+          style={{ width: '100%', justifyContent: 'center', padding: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          Explore as Guest
+        </button>
+
         <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '13px', color: 'var(--text-secondary)' }}>
           Don't have access? <Link to="/signup" style={{ color: '#fff', fontWeight: 600, textDecoration: 'none' }}>Request Access</Link>
         </p>

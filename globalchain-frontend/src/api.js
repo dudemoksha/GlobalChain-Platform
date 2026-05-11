@@ -7,6 +7,45 @@ const getBase = () => {
 
 const BASE = getBase();
 
+// --- GUEST MODE / DEMO DATA ---
+const IS_GUEST = () => localStorage.getItem('isGuest') === 'true';
+
+const MOCK_DATA = {
+  dashboard: {
+    total_suppliers: 142,
+    high_risk_count: 8,
+    moderate_risk_count: 24,
+    active_alerts: 5,
+    recommendations_count: 12,
+    signal_count: 156,
+    status: "ELEVATED",
+    alert_summary: { "Critical": 2, "Warning": 3 }
+  },
+  suppliers: [
+    { id: 1, name: "NanoLink Semiconductors", tier: 1, lat: 35.6895, lng: 139.6917, region: "Japan", product: "AI Chips", risk_score: 0.12, dependency_score: 0.88, status: "approved" },
+    { id: 2, name: "LithiumCore Energy", tier: 2, lat: -23.5505, lng: -46.6333, region: "Brazil", product: "Batteries", risk_score: 0.65, dependency_score: 0.72, status: "approved" },
+    { id: 3, name: "Valyrian Steel Works", tier: 1, lat: 51.5074, lng: -0.1278, region: "UK", product: "High-grade Steel", risk_score: 0.05, dependency_score: 0.45, status: "approved" },
+    { id: 4, name: "Shenzhen Precision", tier: 3, lat: 22.5431, lng: 114.0579, region: "China", product: "Connectors", risk_score: 0.82, dependency_score: 0.95, status: "approved" }
+  ],
+  graph: {
+    nodes: [
+      { id: 1, name: "NanoLink", tier: 1, lat: 35.6, lng: 139.6, risk: 0.12 },
+      { id: 2, name: "LithiumCore", tier: 2, lat: -23.5, lng: -46.6, risk: 0.65 },
+      { id: 4, name: "Shenzhen", tier: 3, lat: 22.5, lng: 114.0, risk: 0.82 }
+    ],
+    edges: [
+      { from: 2, to: 1, weight: 0.8 },
+      { from: 4, to: 2, weight: 0.9 }
+    ]
+  },
+  signals: {
+    total: 156,
+    earthquake: [{ lat: 35.6, lng: 139.6, severity: 0.4, label: "Minor Tremor" }],
+    geopolitical: [{ lat: 22.5, lng: 114.0, severity: 0.8, label: "Trade Restriction" }],
+    weather: []
+  }
+};
+
 function headers() {
   const token = localStorage.getItem('token');
   return {
@@ -21,6 +60,16 @@ function authOnly() {
 }
 
 async function req(method, path, body) {
+  if (IS_GUEST()) {
+    console.log(`[Guest Mode] Mocking ${method} ${path}`);
+    if (path === '/dashboard') return MOCK_DATA.dashboard;
+    if (path === '/suppliers') return { suppliers: MOCK_DATA.suppliers };
+    if (path === '/graph') return MOCK_DATA.graph;
+    if (path === '/signals') return MOCK_DATA.signals;
+    if (path === '/me') return { id: 999, email: 'guest@demo.com', role: 'Buyer', tier: 0, status: 'Approved' };
+    return { status: "ok", message: "Mocked action successful" };
+  }
+
   try {
     const res = await fetch(`${BASE}${path}`, {
       method,
@@ -46,6 +95,12 @@ export const api = {
     const form = new URLSearchParams({ username: email, password });
     return fetch(`${BASE}/token`, { method: 'POST', body: form }).then(r => r.json());
   },
+  guestLogin: () => {
+    localStorage.setItem('isGuest', 'true');
+    localStorage.setItem('token', 'guest-demo-token');
+    localStorage.setItem('role', 'Buyer');
+    return Promise.resolve({ access_token: 'guest-demo-token', role: 'Buyer' });
+  },
   signup: (data) => req('POST', '/signup', data),
   me: () => req('GET', '/me'),
 
@@ -66,6 +121,7 @@ export const api = {
 
   // CSV Bulk Upload
   bulkUpload: (file) => {
+    if (IS_GUEST()) return Promise.resolve({ created: 1, errors: [], names: ["Demo Supplier"] });
     const form = new FormData();
     form.append('file', file);
     return fetch(`${BASE}/suppliers/bulk-upload`, {
@@ -116,7 +172,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  // Note: Vercel does not support persistent WebSockets
+  if (IS_GUEST()) return { close: () => {}, send: () => {} };
   const ws = new WebSocket('wss://globalchain-platform.vercel.app/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
