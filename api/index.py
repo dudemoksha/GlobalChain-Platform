@@ -115,16 +115,12 @@ def _rebuild_graph(db: Session):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: building graph in cloud can be slow, move to lazy or background
-    print("Lifespan started - Cloud Mode")
-    try:
-        # We skip create_all here to speed up cold starts; tables were already created locally
-        pass
-    except Exception as e:
-        print(f"Startup error: {e}")
+    logger.info("Lifespan started - Cloud Mode")
     yield
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 app = FastAPI(title="GlobalChain API", version="2.0.0", lifespan=lifespan)
+handler = app
 
 @app.get("/")
 @app.get("/health")
