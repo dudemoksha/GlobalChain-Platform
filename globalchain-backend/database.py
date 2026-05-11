@@ -16,6 +16,27 @@ if "postgresql://" in SQLALCHEMY_DATABASE_URL and "%40aws" in SQLALCHEMY_DATABAS
     print("DEBUG: Auto-fixing malformed DATABASE_URL...")
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("%40aws", "@aws")
 
+# Auto-fix: Switch direct DB host (IPv6 only) to session-mode pooler (IPv4)
+# Vercel serverless cannot reach IPv6 addresses
+if "db." in SQLALCHEMY_DATABASE_URL and ".supabase.co:5432" in SQLALCHEMY_DATABASE_URL:
+    print("DEBUG: Switching from direct IPv6 host to IPv4 session pooler...")
+    # Extract project ref from host like db.PROJECTREF.supabase.co
+    import re
+    match = re.search(r'db\.([^.]+)\.supabase\.co', SQLALCHEMY_DATABASE_URL)
+    if match:
+        project_ref = match.group(1)
+        # Replace direct host with session-mode pooler host
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace(
+            f"db.{project_ref}.supabase.co:5432",
+            f"aws-0-us-east-1.pooler.supabase.com:5432"
+        )
+        # Also fix the username to include project ref (required for pooler)
+        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace(
+            "postgresql://postgres:",
+            f"postgresql://postgres.{project_ref}:"
+        )
+        print(f"DEBUG: Using session pooler for project: {project_ref}")
+
 # Global engine variable
 _engine = None
 
