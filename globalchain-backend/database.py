@@ -8,23 +8,28 @@ load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./globalchain.db"  # fallback for local dev
+    "sqlite:///./globalchain.db"
 )
 
-try:
-    # PostgreSQL needs no check_same_thread arg; SQLite does
-    connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
-    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
-except Exception as e:
-    print(f"CRITICAL ERROR: Failed to create database engine: {e}")
-    # Fallback to local sqlite to at least allow the app to boot
-    engine = create_engine("sqlite:///./fallback.db", connect_args={"check_same_thread": False})
+# Global engine variable
+_engine = None
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def get_engine():
+    global _engine
+    if _engine is None:
+        try:
+            connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
+            _engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+        except Exception as e:
+            print(f"Lazy Engine Error: {e}")
+            _engine = create_engine("sqlite:///./fallback.db", connect_args={"check_same_thread": False})
+    return _engine
 
 Base = declarative_base()
 
 def get_db():
+    engine = get_engine()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     try:
         yield db

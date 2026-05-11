@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import models
-from database import engine, get_db
+from database import get_engine, get_db
 from auth import verify_password, create_access_token, get_password_hash, decode_token
 from graph_engine import build_graph, get_cached_graph, serialize_graph, get_impact, bfs_propagate, calculate_dependency_scores, invalidate_cache
 from risk_engine import run_risk_update, get_current_signals, fetch_all_signals
@@ -130,11 +130,11 @@ app = FastAPI(title="GlobalChain API", version="2.0.0", lifespan=lifespan)
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "GlobalChain API"}
+
 from fastapi.responses import JSONResponse
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    # Log the error to console (Vercel logs)
     print(f"ERROR: {exc}")
     return JSONResponse(
         status_code=500,
