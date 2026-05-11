@@ -11,6 +11,12 @@ SQLALCHEMY_DATABASE_URL = os.getenv(
     "sqlite:///./globalchain.db"
 )
 
+# Auto-fix: If the '@' before the host was accidentally encoded as '%40'
+if SQLALCHEMY_DATABASE_URL.startswith("postgresql://") and "%40aws-0" in SQLALCHEMY_DATABASE_URL:
+    print("DEBUG: Auto-fixing malformed DATABASE_URL...")
+    # Replace ONLY the one before 'aws-0'
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("%40aws-0", "@aws-0")
+
 # Global engine variable
 _engine = None
 
