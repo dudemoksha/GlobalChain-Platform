@@ -1,8 +1,8 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  // Hardcoded for local development with mobile APK
-  return 'http://10.44.251.141:8000';
+  // Use public tunnel for mobile app connectivity (Works anywhere!)
+  return 'https://rude-roses-argue.loca.lt';
 };
 
 const BASE = getBase();
@@ -116,7 +116,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  const ws = new WebSocket('ws://10.44.251.141:8000/ws');
+  const ws = new WebSocket('wss://rude-roses-argue.loca.lt/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
   };
