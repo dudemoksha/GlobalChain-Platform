@@ -91,9 +91,31 @@ async function req(method, path, body) {
 
 export const api = {
   // Auth
-  login: (email, password) => {
-    const form = new URLSearchParams({ username: email, password });
-    return fetch(`${BASE}/token`, { method: 'POST', body: form }).then(r => r.json());
+  login: async (email, password) => {
+    try {
+      const form = new URLSearchParams();
+      form.append('username', email);
+      form.append('password', password);
+      
+      const res = await fetch(`${BASE}/token`, { 
+        method: 'POST', 
+        body: form,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+      
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || `Login failed: ${res.status}`);
+      }
+      return res.json();
+    } catch (e) {
+      if (e.message === 'Failed to fetch') {
+        throw new Error('Connection error: Cannot reach the backend server at ' + BASE + '. Check your internet or CORS settings.');
+      }
+      throw e;
+    }
   },
   guestLogin: () => {
     localStorage.setItem('isGuest', 'true');

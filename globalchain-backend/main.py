@@ -132,7 +132,15 @@ def health():
     return {"status": "ok", "service": "GlobalChain API"}
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=".*", # Allow all origins including capacitor:// and https://
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "capacitor://localhost",
+        "https://globalchain-platform.vercel.app",
+        "https://globalchain-frontend.vercel.app"
+    ],
+    allow_origin_regex=".*", 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
