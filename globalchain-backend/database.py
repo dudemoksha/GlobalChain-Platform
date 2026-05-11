@@ -17,6 +17,9 @@ _engine = None
 def get_engine():
     global _engine
     if _engine is None:
+        # Debug: Log masked URL to check Vercel environment
+        masked = SQLALCHEMY_DATABASE_URL.split('@')[-1] if '@' in SQLALCHEMY_DATABASE_URL else SQLALCHEMY_DATABASE_URL
+        print(f"DEBUG_DB: {masked}")
         try:
             connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
             _engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
