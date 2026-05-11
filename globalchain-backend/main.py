@@ -128,6 +128,11 @@ async def lifespan(app: FastAPI):
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 app = FastAPI(title="GlobalChain API", version="2.0.0", lifespan=lifespan)
+
+@app.get("/")
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "GlobalChain API"}
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex="http://.*", # Allow any http origin (local or network)
