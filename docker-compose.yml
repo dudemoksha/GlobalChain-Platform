@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: globalchain-postgres
+    environment:
+      POSTGRES_USER: globalchain
+      POSTGRES_PASSWORD: globalchain2026
+      POSTGRES_DB: globalchain
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./globalchain-backend
+      dockerfile: Dockerfile.backend
+    container_name: globalchain-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://globalchain:globalchain2026@postgres:5432/globalchain
+    volumes:
+      - ./globalchain-backend:/app
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./globalchain-frontend
+      dockerfile: Dockerfile.frontend
+    container_name: globalchain-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

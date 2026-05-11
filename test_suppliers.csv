@@ -1,0 +1,4 @@
+name,tier,lat,lng,region,product,cost,capacity,quality,has_backup,revenue_contribution,parent_supplier_id
+Global Tier 1 Hub,1,52.52,13.40,Germany,Logistics,0.5,0.9,0.9,true,0.1,
+Asian Tech Components,2,22.31,114.16,Hong Kong,Electronics,0.4,0.8,0.85,false,0.08,
+Japan Sensor Labs,3,35.67,139.65,Japan,Optics,0.3,0.7,0.95,true,0.04,
