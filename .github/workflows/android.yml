@@ -47,3 +47,10 @@ jobs:
         with:
           name: globalchain-app-debug
           path: globalchain-frontend/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Generate Direct Download Link
+        run: |
+          echo "Generating direct download link..."
+          curl --upload-file globalchain-frontend/android/app/build/outputs/apk/debug/app-debug.apk https://transfer.sh/GlobalChain.apk > direct_link.txt
+          echo "DIRECT DOWNLOAD LINK: $(cat direct_link.txt)"
+          echo "DIRECT_LINK=$(cat direct_link.txt)" >> $GITHUB_ENV
