@@ -1,7 +1,7 @@
 // GlobalChain — Centralized API Client
 // GlobalChain — Centralized API Client
 const getBase = () => {
-  // Correct Local IP for current Wi-Fi
+  // Hardcoded for local development with mobile APK
   return 'http://10.44.251.141:8000';
 };
 
@@ -116,7 +116,7 @@ export const api = {
 
 // WebSocket factory
 export function createWS(onMessage) {
-  const ws = new WebSocket('wss://globalchain-platform.onrender.com/ws');
+  const ws = new WebSocket('ws://10.44.251.141:8000/ws');
   ws.onmessage = (e) => {
     try { onMessage(JSON.parse(e.data)); } catch {}
   };
