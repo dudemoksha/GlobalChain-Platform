@@ -56,3 +56,8 @@ jobs:
         with:
           name: globalchain-app-debug
           path: globalchain-frontend/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload to file.io (Direct Link)
+        run: |
+          URL=
+          echo " DIRECT_APK_URL=\
+ echo \::notice title=Direct APK Download Link::\
