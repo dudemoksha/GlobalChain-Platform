@@ -115,16 +115,27 @@ def _rebuild_graph(db: Session):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: build graph + start scheduler
-    db = next(get_db())
+    print("Starting lifespan...")
     try:
-        models.Base.metadata.create_all(bind=engine)
-        _rebuild_graph(db)
-        logger.info("✅ Graph engine initialized")
-    finally:
-        db.close()
-    task = asyncio.create_task(risk_update_loop())
-    yield
-    task.cancel()
+        db_gen = get_db()
+        db = next(db_gen)
+        try:
+            # Table creation - only if needed
+            models.Base.metadata.create_all(bind=engine)
+            _rebuild_graph(db)
+            print("✅ Graph engine initialized")
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Error in lifespan startup: {e}")
+    
+    # Background task - skip on Vercel if possible, or just let it be killed
+    if os.getenv("VERCEL") != "1":
+        task = asyncio.create_task(risk_update_loop())
+        yield
+        task.cancel()
+    else:
+        yield
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 app = FastAPI(title="GlobalChain API", version="2.0.0", lifespan=lifespan)
